@@ -12,10 +12,10 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="main.css" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="Share text - fast and easy" />
   </head>
@@ -23,7 +23,7 @@
     <div
       class="heading m-4 mt-4 mt-md-4 mb-4 d-flex justify-content-center align-items-center"
     >
-      <img class="main-img l1 i1" src="/images/copy.png" alt="Not Found" />
+      <img class="main-img l1 i1" src="images/copy.png" alt="Not Found" />
       <h1 class="pt-2 pt-md-1 l1">Share Text</h1>
     </div>
     <div class="container mb-5">
@@ -119,7 +119,7 @@
         if (interval) {
           clearTimeout(interval);
         }
-        fetch(`/gettext?value=${secret}`)
+        fetch(`gettext?value=${secret}`)
           .then((res) => res.json())
           .then((data) => {
             loader.style.display = "none";
@@ -210,7 +210,7 @@
 
       function deleteOne(id) {
         loader.style.display = "inline-block";
-        fetch("/deleteone", {
+        fetch("deleteone", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -260,7 +260,7 @@
                 "hover5"
               );
               newNode.addEventListener("click", () => {
-                window.open("/", "_self");
+                window.open("/sharetext", "_self");
               });
             }
             return;
@@ -378,7 +378,7 @@
 
           pintop.addEventListener("click", function (e) {
             loader.style.display = "inline-block";
-            fetch("/pintop", {
+            fetch("pintop", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -443,7 +443,7 @@
             .querySelector(".important")
             .addEventListener("click", function (eg) {
               loader.style.display = "inline-block";
-              fetch("/important", {
+              fetch("important", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -625,7 +625,7 @@
         loader.style.display = "inline-block";
         let text = document.querySelector('input[name="text"]');
         e.preventDefault();
-        fetch("/deletetext")
+        fetch("deletetext")
           .then((res) => res.json())
           .then((data) => {
             loader.style.display = "none";
@@ -653,7 +653,7 @@
           text: value,
         };
 
-        fetch("/addtext", {
+        fetch("addtext", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -681,7 +681,7 @@
       let heading = document.querySelectorAll(".l1");
       heading.forEach((e) => {
         e.addEventListener("click", (e) => {
-          window.open("/", "_self");
+          window.open("/sharetext", "_self");
         });
       });
     </script>
