@@ -101,7 +101,7 @@ app.post("/addtext", async (req, res, next) => {
     }
 
     if (req.body.text.trim() == `${process.env.SECRET}`) {
-      try {
+      try { 
         res.json({ status: "success", secret: `${process.env.SECRET}` });
       } catch (err) {
         res.status(500).json({ msg: "Server error" });
