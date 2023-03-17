@@ -107,11 +107,18 @@ app.post("/addtext", async (req, res, next) => {
         res.status(500).json({ msg: "Server error" });
       }
       return;
-    } else if (req.body.text.includes(`${process.env.SECRET}`)) {
-      let text = req.body.text.replace(`${process.env.SECRET}`, "");
+    } else if (req.body.text.includes(`${process.env.SECRET}=`)) {
+  
+      let text = req.body.text.replace(`${process.env.SECRET}=`, "");
+  console.log(text)
       req.body.text = text;
       req.body.hidden = true;
+    }else if(req.body.text == `${process.env.SECRET}:removeall`){
+      let text = await Text.deleteMany({hidden:true});
+    res.json(text);
+    return;
     }
+
 
     const text = new Text(req.body);
     await text.save();
@@ -123,7 +130,7 @@ app.post("/addtext", async (req, res, next) => {
 
 app.get("/deletetext", async (req, res, next) => {
   try {
-    const text = await Text.deleteMany();
+    const text = await Text.deleteMany({hidden:false});
 
     res.json(text);
   } catch (err) {
