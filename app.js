@@ -5,8 +5,13 @@ const path = require("path");
 const Text = require("./models/text");
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
+const cookieParser = require("cookie-parser");
 dayjs.extend(utc);
 require("dotenv").config();
+
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+
 mongoose.set("strictQuery", false);
 mongoose
   .connect(`${process.env.MONGO_URI}`, {
@@ -20,13 +25,95 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+
+
+// Create a new MongoDBStore object using the same mongoose connection
+const store = MongoStore.create({
+  mongoUrl: `${process.env.MONGO_URI}`,
+  dbName: `${process.env.DB_NAME}`,
+  collectionName: "sessions",
+  ttl:1000 * 60 * 60 * 24 * 3,
+  client: mongoose.connection,
+});
+
+store.on('error', (error) => {
+  console.log(error);
+});
+
+
+
+  app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: store,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 3 , // Session will expire in 3 days 
+      secure: true, // Set it to true if you're using HTTPS
+      httpOnly: true,
+      sameSite: 'lax'
+    }
+  }));
+  
+
+app.use(cookieParser());
+
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 
-app.get("/", (req, res) => {
-  res.render("index");
+app.use(express.urlencoded({extended:true}));
+
+
+app.get('/login',(req,res)=>{
+  const errorMessage = req.session.errorMessage || '';
+  req.session.errorMessage = '';
+  res.render('login', { error: errorMessage }); 
 });
+
+app.post('/login',(req,res)=>{
+ const { username, password } = req.body;
+
+ if (username === process.env.USER_NAME && password === process.env.PASSWORD) {
+   req.session.user = {
+     username: username,
+     role: 'admin'
+   };
+   res.redirect('/');
+ } else {
+  req.session.errorMessage = 'Invalid username or password!';
+  res.redirect('/login');
+ }
+});
+
+
+
+
+const authMiddleware = (req, res, next) => {
+  if (req.session.user) {
+    next();
+  } else {
+    res.redirect('/login');
+  }
+};
+app.use(authMiddleware);
+ 
+ 
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();      
+res.redirect('/login');
+});
+
+app.get("/", (req, res) => {
+
+  res.render("index");
+  
+});
+
+
 
 app.get("/gettext", async (req, res, next) => {
   try {
