@@ -3,6 +3,7 @@ app = express();
 const mongoose = require("mongoose");
 const path = require("path");
 const Text = require("./models/text");
+const backupText = require("./models/backup");
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
 const cookieParser = require("cookie-parser");
@@ -26,7 +27,7 @@ mongoose
     console.log(err);
   });
 
-
+app.set('trust proxy', true);
 
 // Create a new MongoDBStore object using the same mongoose connection
 const store = MongoStore.create({
@@ -49,7 +50,7 @@ store.on('error', (error) => {
     saveUninitialized: true,
     store: store,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 3 , // Session will expire in 3 days 
+      maxAge: 1000 * 60 * 60 * 24 * 7 , // Session will expire in 7 days 
       secure: true, // Set it to true if you're using HTTPS
       httpOnly: true,
       sameSite: 'lax'
@@ -197,21 +198,42 @@ app.post("/addtext", async (req, res, next) => {
     } else if (req.body.text.includes(`${process.env.SECRET}=`)) {
   
       let text = req.body.text.replace(`${process.env.SECRET}=`, "");
-  console.log(text)
       req.body.text = text;
       req.body.hidden = true;
+      req.body.important=true;
     }else if(req.body.text == `${process.env.SECRET}:removeall`){
       let text = await Text.deleteMany({hidden:true});
     res.json(text);
     return;
+    }else if(req.body.text == `${process.env.SECRET}:restore`){
+      let backuptext = await backupText.find();
+      backuptext.forEach(async(eachtext)=>{
+         delete eachtext.createdAt;
+        
+        const uptext = new Text({
+          text:eachtext.text,
+          important:true
+        });
+         await uptext.save();
+      })
+      
+      res.json(backuptext);
+      return;
+    }else if(req.body.text == `${process.env.SECRET}:commands`){
+      const text = new Text({text:`removeall || restore`});
+      await text.save();
+     return res.json(text);
     }
-
-
     const text = new Text(req.body);
     await text.save();
+    
     res.json(text);
+const backuptext = new backupText(req.body);
+backuptext.save();
+   
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
+    console.log(err)
   }
 });
 
@@ -281,6 +303,6 @@ app.post("/pintop", async (req, res, next) => {
   }
 });
 
-app.listen(9003, () => {
+app.listen(9004, () => {
   console.log("server is started");
 });

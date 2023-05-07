@@ -162,7 +162,7 @@ list.addEventListener("DOMNodeInserted", function (event) {
           "hover5"
         );
         newNode.addEventListener("click", () => {
-          window.open("/sharetext", "_self");
+          window.open("/", "_self");
         });
       }
       return;
@@ -569,8 +569,11 @@ form.addEventListener("submit", (e) => {
       }
       loader.style.display = "none";
       text.value = "";
+   
       if (data.status) {
         getText(false, true, data.secret);
+        Fill();
+        return;
       }
       getText();
       Fill();
@@ -583,6 +586,6 @@ form.addEventListener("submit", (e) => {
 let heading = document.querySelectorAll(".l1");
 heading.forEach((e) => {
   e.addEventListener("click", (e) => {
-    window.open("/sharetext", "_self");
+    window.open("/", "_self");
   });
 });
