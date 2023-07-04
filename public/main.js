@@ -62,7 +62,7 @@ async function getText(
 
       data.forEach((text) => {
         let li = document.createElement("li");
-        li.innerHTML = text.text;
+        li.textContent = text.text;
         li.dataset.id = text._id;
         li.dataset.important = text.important;
         li.dataset.date = text.created;
